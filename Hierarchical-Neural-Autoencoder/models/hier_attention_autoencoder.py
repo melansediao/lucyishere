@@ -40,7 +40,7 @@ class HierarchicalAttentionAutoencoder(object):
         self.output_data = tf.placeholder(tf.int32, [self.batch_size,
                                                      self.doc_steps,
                                                      self.sent_steps])
-        with tf.device("/cpu:0"):
+        with tf.device("/gpu:0"):
             self.embedding = tf.get_variable("embedding", [self.vocab_size, self.size])
             self.inputs = []
             for s in range(self.doc_steps):
