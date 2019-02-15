@@ -205,17 +205,19 @@ class HierarchicalAutoencoder(object):
 
     def train(self, sess, data_path, iterator, iterations=100, save_iters=10):
         model_dir, model_name = self.get_model_dir()
-        merged_sum = tf.merge_all_summaries()
-        writer = tf.train.SummaryWriter("./logs/{}".format(model_dir),
+        merged_sum = tf.summary.merge_all()
+        writer = tf.summary.FileWriter("./logs/{}".format(model_dir),
                                         sess.graph)
 
         sess.run(tf.initialize_all_variables())
         i = 0
+        print (i)
         for x,y in iterator(data_path, self.vocab, self.sent_steps,
                             self.doc_steps, batch_size=self.batch_size):
             outputs = sess.run(self.logits + [self.optim, merged_sum],
                                {self.input_data: x, self.output_data: y})
             print (i)
+            
             logits      = outputs[:-2]
             summary_str = outputs[-1]
 

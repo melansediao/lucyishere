@@ -45,7 +45,7 @@ def main():
         print("max_doc_len="  + str(max_doc_len))
         #print("len(rev_vocab)=" + str(len(rev_vocab)))
         print ("train ...")
-        model.train(sess, debug_data_path, data_iterator, iterations=500, save_iters=25)
+        model.train(sess, debug_data_path, data_iterator, iterations=10, save_iters=5)
 
 
 def sample():
