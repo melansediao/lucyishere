@@ -133,23 +133,26 @@ class HierarchicalAutoencoder(object):
         w = tf.get_variable("w", [self.size, self.vocab_size])
         b = tf.get_variable("b", [self.vocab_size])
 
-        def sampled_loss(inputs, labels):
+        def sampled_loss(logits, labels):
             labels = tf.reshape(labels, [-1, 1])
-            return tf.nn.sampled_softmax_loss(tf.transpose(w), b, inputs,
-                                              labels, self.num_samples,
+            return tf.nn.sampled_softmax_loss(tf.transpose(w), b,
+                                              labels, logits, self.num_samples,
                                               self.vocab_size)
 
         targets = tf.reshape(self.output_data, [self.batch_size,
                                                 self.doc_steps*self.sent_steps])
         targets = [targets[:,i] for i in range(self.doc_steps*self.sent_steps)]
         weights = [tf.ones([self.batch_size]) for _ in range(self.doc_steps*self.sent_steps)]
-        loss    = tf.nn.seq2seq.sequence_loss_by_example(word_decodes, targets, weights,
+        # loss    = tf.nn.seq2seq.sequence_loss_by_example(word_decodes, targets, weights,
+        #                                                  softmax_loss_function=sampled_loss)
+
+        loss    = tf.contrib.legacy_seq2seq.sequence_loss_by_example(word_decodes, targets, weights,
                                                          softmax_loss_function=sampled_loss)
 
         self.cost  = tf.reduce_sum(loss)/self.batch_size
         self.optim = tf.train.GradientDescentOptimizer(0.01).minimize(self.cost,
                 aggregation_method=tf.AggregationMethod.EXPERIMENTAL_TREE)
-        tf.scalar_summary("cost", self.cost)
+        tf.contrib.deprecated.scalar_summary("cost", self.cost)
 
         #self.lr   = tf.Variable(0.0, trainable=False)
         #tvars     = tf.trainable_variables()
@@ -160,7 +163,8 @@ class HierarchicalAutoencoder(object):
     def _build_zero_state(self, h):
         # TODO: incorporate batch_size
         c = tf.zeros_like(h)
-        return tf.concat([c, h],1 )
+        # return tf.concat([c, h],1 )
+        return (c,h)
 
     def get_model_dir(self):
         model_name = type(self).__name__ or "Reader"
